@@ -24,6 +24,12 @@ secrets/
 credentials/
 .k3s-node-token
 
+# Configuration files with actual values
+configs/base/config.env
+configs/base/nodes.conf
+configs/environments/*/config.env
+configs/environments/*/nodes.conf
+
 # Backup files
 *.bak
 *.backup

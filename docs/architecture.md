@@ -17,7 +17,7 @@ This document describes the architecture of the M3 Ultra K3s cluster deployment 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        Control Plane                         │
-│                    (192.168.1.204)                          │
+│                    (<CONTROL_PLANE_IP>)                     │
 │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────┐   │
 │  │   etcd      │  │  API Server  │  │  Controller     │   │
 │  │            │  │              │  │  Manager        │   │
@@ -29,7 +29,7 @@ This document describes the architecture of the M3 Ultra K3s cluster deployment 
 ┌─────────────────────────────┴─────────────────────────────┐
 │                        Worker Nodes                         │
 │  ┌───────────┐  ┌───────────┐  ┌───────────┐             │
-│  │   .246    │  │   .251    │  │   .183    │   ...       │
+│  │  Worker 1 │  │  Worker 2 │  │  Worker 3 │   ...       │
 │  │  kubelet  │  │  kubelet  │  │  kubelet  │             │
 │  │  kube-    │  │  kube-    │  │  kube-    │             │
 │  │  proxy    │  │  proxy    │  │  proxy    │             │
@@ -42,7 +42,7 @@ This document describes the architecture of the M3 Ultra K3s cluster deployment 
 ### Cluster Networking
 - **Pod Network**: 10.42.0.0/16 (Flannel CNI)
 - **Service Network**: 10.43.0.0/16
-- **Node Network**: 192.168.1.0/24
+- **Node Network**: <YOUR_SUBNET>
 
 ### Required Ports
 - **6443**: Kubernetes API server
@@ -55,7 +55,7 @@ This document describes the architecture of the M3 Ultra K3s cluster deployment 
 ## Storage Architecture
 
 ### NFS Storage
-- **Server**: Control plane node (192.168.1.204)
+- **Server**: Control plane node
 - **Export Path**: /Users/Shared/k3s-nfs
 - **Access**: All cluster nodes
 - **Use Cases**: Shared persistent volumes

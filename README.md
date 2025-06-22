@@ -67,8 +67,8 @@ The cluster supports per-node username configuration. Edit `configs/base/nodes.c
 
 ```
 # Format: IP_ADDRESS USERNAME ROLE NOTES
-192.168.1.204 damonmcdougald control-plane m3-cluster-1
-192.168.1.246 damonmcdougdl worker m3-cluster-1
+<CONTROL_PLANE_IP> <USERNAME> control-plane <NODE_NAME>
+<WORKER_IP> <USERNAME> worker <NODE_NAME>
 ```
 
 ### Environment Variables

@@ -1,0 +1,14 @@
+# Node Configuration File
+# Format: IP_ADDRESS USERNAME ROLE [NOTES]
+# This file makes it easy to manage per-node configuration
+
+# Control Plane
+<CONTROL_PLANE_IP> <USERNAME> control-plane <NODE_NAME>
+
+# Worker Nodes
+<WORKER_IP_1> <USERNAME> worker <NODE_NAME>
+<WORKER_IP_2> <USERNAME> worker <NODE_NAME>
+<WORKER_IP_3> <USERNAME> worker <NODE_NAME>
+
+# Example with different username for specific node:
+# 10.0.0.5 different_user worker special-node
