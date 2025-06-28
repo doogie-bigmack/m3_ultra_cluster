@@ -59,27 +59,68 @@ cp configs/base/config.env.example configs/base/config.env
 └── tests/              # Test suites
 ```
 
-## 🖼️ High-level Architecture
+## 🖼️ Reference Architecture
 
 ```mermaid
-graph TD
-    Dev[Developer Mac] -->|Bootstrap scripts| CP(Control-Plane Node)
-    Dev -->|Bootstrap scripts| WN(Worker Nodes)
-    CP --> WN
-    subgraph "Cluster Add-ons"
-        MetalLB[MetalLB / CNI] --> CP
-        Ingress[Ingress-NGINX] --> CP
-        CertManager[Cert-Manager] --> CP
-        PromOp[Prometheus Operator] --> CP
-        ArgoCD[ArgoCD] --> CP
+flowchart LR
+    subgraph Developer
+        Dev[Developer Mac]
     end
+    subgraph Bootstrap
+        Script[Bootstrap Scripts]
+    end
+    Dev --> Script
+    Script --> CP[Control-Plane Node]
+    Script --> WN[Worker Nodes]
+    CP -->|k3s agent join| WN
+    subgraph "Core Services"
+        Core[etcd + API-server + Scheduler]
+    end
+    CP --> Core
+    subgraph Addons
+        MetalLB[MetalLB]
+        Ingress[Ingress-NGINX]
+        CertManager[Cert-Manager]
+        ArgoCD[ArgoCD]
+        PromOp[Prometheus Operator]
+    end
+    MetalLB --> CP
+    Ingress --> CP
+    CertManager --> CP
+    ArgoCD --> CP
+    PromOp --> CP
     subgraph Observability
-        PromOp --> Prometheus
-        PromOp --> Alertmanager
-        PromOp --> Grafana
-        PromOp --> Loki
+        Prometheus --> PromOp
+        Grafana --> PromOp
+        Loki --> PromOp
+        Alertmanager --> PromOp
     end
-    ArgoCD --> Apps[GitOps Applications]
+    ArgoCD --> Apps[GitOps Apps]
+```
+
+## ⏱️ Bootstrap Sequence
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant Script as Bootstrap Script
+    participant CP as Control-Plane
+    participant W1 as Worker Node
+
+    Dev->>Script: Run 00-preflight.sh
+    Script->>Dev: Validate tools / config
+    Dev->>Script: Run 01-install-deps.sh
+    Script->>CP: Install packages via SSH
+    Script->>W1: Install packages via SSH
+    Dev->>Script: Run 02-init-control.sh
+    Script->>CP: k3s server install
+    CP-->>Script: Return join-token
+    Script->>Dev: Write token to local file
+    Dev->>Script: Run 03-join-workers.sh
+    Script->>W1: k3s agent install --token
+    W1-->>CP: Join cluster
+    Script->>CP: Deploy addons (MetalLB, Ingress…)
+    Script->>CP: Deploy observability stack
 ```
 
 ## 🔧 Configuration
