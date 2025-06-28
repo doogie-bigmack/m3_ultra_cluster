@@ -59,6 +59,29 @@ cp configs/base/config.env.example configs/base/config.env
 └── tests/              # Test suites
 ```
 
+## 🖼️ High-level Architecture
+
+```mermaid
+graph TD
+    Dev[Developer Mac] -->|Bootstrap scripts| CP(Control-Plane Node)
+    Dev -->|Bootstrap scripts| WN(Worker Nodes)
+    CP --> WN
+    subgraph "Cluster Add-ons"
+        MetalLB[MetalLB / CNI] --> CP
+        Ingress[Ingress-NGINX] --> CP
+        CertManager[Cert-Manager] --> CP
+        PromOp[Prometheus Operator] --> CP
+        ArgoCD[ArgoCD] --> CP
+    end
+    subgraph Observability
+        PromOp --> Prometheus
+        PromOp --> Alertmanager
+        PromOp --> Grafana
+        PromOp --> Loki
+    end
+    ArgoCD --> Apps[GitOps Applications]
+```
+
 ## 🔧 Configuration
 
 ### Node Configuration
