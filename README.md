@@ -41,6 +41,9 @@ cp configs/base/config.env.example configs/base/config.env
 
 # Join worker nodes
 ./scripts/bootstrap/03-join-workers.sh
+
+# Configure SSH keychain (optional but recommended)
+./scripts/operations/setup-ssh-keychain.sh
 ```
 
 ## 📁 Repository Structure
@@ -63,6 +66,45 @@ cp configs/base/config.env.example configs/base/config.env
 
 ```mermaid
 flowchart LR
+    subgraph Developer
+        Dev[Developer Mac]
+    end
+    subgraph Bootstrap
+        BS[Bootstrap Scripts]
+    end
+    subgraph Operations
+        OPS[Operation Scripts\nsetup-ssh-keychain.sh]
+    end
+    Dev --> BS
+    Dev --> OPS
+    BS --> CP[Control-Plane Node]
+    BS --> WN[Worker Nodes]
+    OPS --> CP
+    OPS --> WN
+    CP -->|k3s agent join| WN
+    subgraph "Core Services"
+        Core[etcd + API-server + Scheduler]
+    end
+    CP --> Core
+    subgraph Addons
+        MetalLB[MetalLB]
+        Ingress[Ingress-NGINX]
+        CertManager[Cert-Manager]
+        ArgoCD[ArgoCD]
+        PromOp[Prometheus Operator]
+    end
+    MetalLB --> CP
+    Ingress --> CP
+    CertManager --> CP
+    ArgoCD --> CP
+    PromOp --> CP
+    subgraph Observability
+        Prometheus --> PromOp
+        Grafana --> PromOp
+        Loki --> PromOp
+        Alertmanager --> PromOp
+    end
+    ArgoCD --> Apps[GitOps Apps]
     subgraph Developer
         Dev[Developer Mac]
     end
@@ -102,6 +144,28 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
+    participant Dev as Developer
+    participant BS as Bootstrap Scripts
+    participant OPS as Operation Scripts
+    participant CP as Control-Plane
+    participant W1 as Worker Node
+
+    Dev->>BS: 00-preflight.sh
+    BS->>Dev: Validate config
+    Dev->>BS: 01-install-deps.sh
+    BS->>CP: Install packages
+    BS->>W1: Install packages
+    Dev->>BS: 02-init-control.sh
+    BS->>CP: k3s server install
+    CP-->>BS: Return join-token
+    BS->>Dev: Save token
+    Dev->>BS: 03-join-workers.sh
+    BS->>W1: k3s agent install --token
+    W1-->>CP: Join cluster
+    BS->>CP: Deploy addons & observability
+    Dev->>OPS: setup-ssh-keychain.sh
+    OPS->>CP: Propagate SSH keychain
+    OPS->>W1: Propagate SSH keychain
     participant Dev as Developer
     participant Script as Bootstrap Script
     participant CP as Control-Plane
